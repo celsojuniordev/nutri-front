@@ -11,7 +11,7 @@ O sistema DEVE exibir um formulário de cadastro com os campos nome completo, e-
 
 #### Scenario: Cadastro bem-sucedido sem empresa
 - **WHEN** um visitante preenche nome, e-mail ainda não utilizado e senha válida, deixa empresa em branco, e envia o formulário
-- **THEN** o sistema envia a requisição de cadastro sem o campo empresa, exibe uma confirmação de conta criada e encaminha o visitante para a tela de login ou diretamente para a área autenticada
+- **THEN** o sistema envia a requisição de cadastro sem o campo empresa, exibe uma confirmação de conta criada e encaminha o visitante para a tela de login (o cadastro não emite um token de acesso, então não há autenticação automática nesta etapa)
 
 #### Scenario: Cadastro bem-sucedido com empresa
 - **WHEN** um visitante preenche nome, e-mail ainda não utilizado, senha válida e o nome de uma empresa, e envia o formulário
@@ -34,10 +34,10 @@ O sistema DEVE validar, antes do envio, que nome não está vazio nem contém ap
 
 #### Scenario: Nome ou empresa apenas com espaços em branco
 - **WHEN** um visitante preenche o campo nome, ou o campo empresa, apenas com espaços em branco e tenta enviar o formulário
-- **THEN** o sistema trata o campo como vazio, exibe a mensagem de campo obrigatório (para nome) ou ignora o campo como não informado (para empresa quando aplicável), e não envia uma requisição com esse valor inválido
+- **THEN** o sistema trata o campo como inválido em ambos os casos — exibe a mensagem de campo obrigatório para nome, e uma mensagem de valor inválido para empresa (que não é o mesmo que deixar empresa em branco/não informada) — e não envia uma requisição com esse valor
 
 #### Scenario: Campo acima do tamanho máximo permitido
-- **WHEN** um visitante digita um nome ou empresa com mais de 255 caracteres
+- **WHEN** um visitante digita um nome ou empresa com mais de 255 caracteres, ou uma senha com mais de 72 caracteres
 - **THEN** o sistema impede a digitação além do limite ou exibe uma mensagem de tamanho máximo excedido, e não envia a requisição enquanto o campo exceder o limite
 
 ### Requirement: Tratamento de Erros do Servidor no Cadastro
@@ -99,6 +99,10 @@ O sistema DEVE tratar a rejeição do backend ao token de identidade do Google c
 - **WHEN** o backend responde à tentativa de login via Google com HTTP 401 e o código de erro `GOOGLE_TOKEN_INVALID`
 - **THEN** o sistema exibe uma mensagem indicando falha ao entrar com Google e não estabelece sessão
 
+#### Scenario: Falha de rede ou servidor indisponível no login via Google
+- **WHEN** o envio do token de identidade ao backend falha por erro de rede ou por uma resposta do servidor que não corresponde a um código de erro tratado
+- **THEN** o sistema exibe uma mensagem de erro genérica indicando falha ao entrar com Google, sem estabelecer sessão
+
 ### Requirement: Persistência de Sessão Autenticada
 O sistema DEVE reter a sessão autenticada (o token de acesso emitido pelo backend) de forma que um nutricionista que recarregue a página, ou reabra a aplicação, continue autenticado sem precisar refazer login, enquanto o token não expirar nem for invalidado.
 
@@ -145,6 +149,10 @@ O sistema DEVE, para um nutricionista autenticado, consultar e exibir seus próp
 #### Scenario: Empresa não cadastrada
 - **WHEN** um nutricionista autenticado sem empresa cadastrada acessa a tela de perfil
 - **THEN** o sistema exibe nome e e-mail e não exibe um valor de empresa (campo omitido ou indicado como não informado)
+
+#### Scenario: Falha ao carregar o próprio perfil
+- **WHEN** a consulta aos próprios dados de perfil falha por erro de rede ou por uma resposta do servidor que não é HTTP 401 (ex.: HTTP 500)
+- **THEN** o sistema exibe uma mensagem de erro genérica indicando falha ao carregar o perfil, sem encerrar a sessão nem redirecionar para o login (esse tratamento é exclusivo de uma resposta HTTP 401, ver "Expiração ou Invalidação de Sessão")
 
 ### Requirement: Logout do Nutricionista
 O sistema DEVE permitir que um nutricionista autenticado encerre sua sessão a partir de uma ação explícita na interface, invalidando a sessão tanto no backend quanto no cliente.

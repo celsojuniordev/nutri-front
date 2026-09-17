@@ -19,7 +19,7 @@ As decisões de stack abaixo (framework, UI, dados/formulários, testes) foram c
 - Definir a estratégia de testes (unitário/componente + e2e) cobrindo os cenários do spec delta desta capacidade.
 
 **Non-Goals:**
-- Não definir o design visual/identidade de marca final — usa-se os componentes padrão do shadcn/ui, sem tema customizado nesta change.
+- Não desenhar as telas de negócio futuras (pacientes, dietas, avaliação física) — a identidade visual definida aqui (marca Evolvitta, paleta de cores, tipografia) deve ser reaproveitada por elas quando forem especificadas, não redefinida.
 - Não implementar recuperação de senha, verificação de e-mail, MFA ou refresh token — nenhum desses existe no backend nesta fase (ver `nutri-back` - Non-Goals).
 - Não construir as telas de negócio completas (pacientes, dietas, avaliação física) — apenas uma tela mínima de perfil para validar o fluxo ponta a ponta.
 - Não definir pipeline de CI/CD ou hospedagem de produção — fora do escopo desta change de frontend inicial.
@@ -100,10 +100,39 @@ Usa-se `react-router-dom` com dois wrappers de rota: `ProtectedRoute` (redirecio
 ### Integração com Google Identity Services
 O botão "Entrar com Google" usa o SDK do Google Identity Services carregado no cliente (via biblioteca de integração para React, ex.: `@react-oauth/google`, configurada com `VITE_GOOGLE_CLIENT_ID`) para obter um `idToken` diretamente do Google, sem redirecionamento gerenciado pelo backend — o mesmo modelo assumido pelo design do backend ("o frontend já obtém o `id_token` diretamente do Google no cliente"). O `idToken` obtido é enviado a `POST /api/auth/google`; a resposta (`{ token, accountCreated }`) segue o mesmo fluxo de estabelecimento de sessão do login tradicional, e `accountCreated` é usado apenas para variar a mensagem de boas-vindas exibida (ver spec - "Entrar com Google cria conta automaticamente").
 
+**Importante — `VITE_GOOGLE_CLIENT_ID` deve ser idêntico ao `GOOGLE_CLIENT_ID` do backend**: o backend valida a claim `aud` (audiência) do token de identidade contra o Client ID configurado em `GOOGLE_CLIENT_ID` (ver `nutri-back` design.md - "Login social"). Como o frontend usa `VITE_GOOGLE_CLIENT_ID` para solicitar esse mesmo token ao Google, os dois valores precisam apontar para o mesmo Client ID do Google Cloud Console em cada ambiente (dev/staging/produção) — caso contrário, todo login via Google falha com `GOOGLE_TOKEN_INVALID` mesmo com a implementação correta. Esta exigência deve ser documentada no README do projeto (ver tasks.md - Documentação).
+
 ### Estratégia de testes
 - **Unitário**: schemas Zod (cada regra de validação do cadastro/login) e funções puras de `session.ts` (leitura/escrita/limpeza do token).
 - **Componente** (Testing Library + Vitest): `RegisterPage` e `LoginPage` cobrindo cada cenário de validação de cliente e cada mensagem de erro do servidor mockando as funções de `api.ts`; `GoogleLoginButton` mockando o SDK do Google para simular sucesso, cancelamento e falha; `ProtectedRoute`/`RedirectIfAuthenticated` cobrindo redirecionamento com e sem sessão.
 - **E2E** (Playwright, contra a API real ou mockada por interceptação de rede): fluxo completo cadastro → confirmação → login → acesso à tela de perfil autenticada → logout → tentativa de voltar a rota protegida negada; login via Google mockado interceptando a chamada de rede a `POST /api/auth/google` (sem depender do SDK real do Google em CI).
+
+### Identidade Visual e Design System: marca Evolvitta
+Esta change também define e aprova a identidade visual inicial do produto, incorporada a partir de uma proposta visual dedicada (um canvas de design com pranchas de marca, cores, tipografia, componentes e telas de login/cadastro aplicadas), revisada e aprovada explicitamente pelo usuário antes desta decisão ser registrada.
+
+**Marca**: nome do produto **Evolvitta**, com o slogan **"Acompanhe cada evolução."** — reforça o conceito de acompanhar a evolução do paciente ao longo do tempo, conectando com a futura capacidade de avaliação física/histórico do sistema. O símbolo é um anel de progresso (arco de ~270°, `stroke-linecap: round`) na cor primária, com um pequeno círculo de "porção" na cor de acento posicionado no início do arco — representa acompanhamento nutricional medido ao longo do tempo. O wordmark "Evolvitta" usa Manrope 800 com letter-spacing levemente negativo.
+
+**Paleta de cores** (tokens a configurar no tema Tailwind/shadcn/ui):
+
+| Grupo | Tokens | Hex principal | Uso |
+|---|---|---|---|
+| Primária — Sálvia | `primary-50` … `primary-900` | `primary-500` `#2F6F5E` (marca) | Cor de marca; ações primárias; painel de marca das telas de auth (`primary-700` `#1E4A40`) |
+| Acento — Terracota | `accent-100` … `accent-700` | `accent-500` `#C9683D` | Usado com moderação em CTAs/realces — nunca como cor de fundo dominante |
+| Neutros quentes | `neutral-0` … `neutral-900` | `neutral-0` `#FBF9F6` (fundo), `neutral-900` `#211F1A` (texto) | Fundo, bordas (`neutral-200` `#D8D1C4`), texto secundário (`neutral-600` `#6B6355`) — deliberadamente quentes, não cinza frio/azulado, para não parecer clínico |
+| Semânticas | `success` `#3F8F5C`, `warning` `#C98A2E`, `danger` `#B23B3B`, `info` `#3B6EA5` | — | Distintas da cor de marca para não confundir feedback com identidade; `danger` mapeia os erros 400/401/409 da tabela "Tratamento de erro centralizado" acima; `info` é o único tom frio do sistema |
+
+**Tipografia** (sistema de duas trilhas):
+- **Produto (UI do app)**: Manrope (500/600/700/800) para títulos, ações e botões; Public Sans (400/500/600/700) para corpo de texto, rótulos de formulário, tabelas e dados — escolhida pela alta legibilidade em telas densas de formulário. Ambas carregadas via Google Fonts; evita fontes-clichê de UI genérica (Inter/Roboto/Arial). Escala de referência: H1 Manrope 700 32/40, H2 Manrope 700 24/32, H3 Manrope 600 18/26, Body Public Sans 400 16/26, Body small Public Sans 400 14/22, Label/Caption Public Sans 600 12/16 (uppercase, tracked), Button Manrope 600 14–15/1.
+- **Documento (exportação de dieta em PDF entregue ao paciente)**: Lora (500/600, com itálico) reservada para o título do documento, nome das refeições e a assinatura do nutricionista — dá um tom mais humano/editorial ao material que chega às mãos do paciente; o corpo/tabelas de itens do PDF permanecem em Public Sans para consistência com os dados do app. Esta decisão pertence, na prática, à futura capacidade `diet-prescription` (que vai gerar o PDF), mas o token de fonte é registrado aqui junto ao restante da identidade, para reuso — evitando que a capacidade futura precise redefinir a marca.
+
+**Componentes** (estilo visual, complementando as decisões de tooling de "UI/Estilo" acima):
+- **Botões**: primário (fundo `primary-500`, hover `primary-600`, foco com anel `primary-300`), secundário (contorno `primary-500` sobre fundo branco), ghost (texto `neutral-800`, hover `neutral-50`), destrutivo (fundo `danger`), desabilitado (fundo/texto `neutral-100`/`neutral-400`). Border-radius 10px em botões e inputs.
+- **Inputs**: borda `neutral-200` 1.5px; foco com borda `primary-500` + anel `primary-100` (box-shadow); erro com borda `danger` e texto de erro `danger` abaixo do campo; label sempre visível acima do campo (Public Sans 600 13px), nunca placeholder-only, por acessibilidade.
+- **Alertas/feedback**: mapeados por código de erro do backend, reaproveitando a tabela "Tratamento de erro centralizado" acima — `EMAIL_ALREADY_IN_USE`/`VALIDATION_ERROR` em tom `danger` claro, aviso de política de senha em tom `warning` claro, confirmação de conta criada em tom `success` claro, aviso de sessão expirada em tom `info` claro.
+- **Layout de autenticação** (Login/Cadastro): tela dividida em duas colunas — painel de marca (fundo `primary-700`, logo + slogan + prova social/benefícios) e painel de formulário (fundo `neutral-0`, formulário centralizado).
+- **Botão "Continuar com Google"**: estilo outline neutro (fundo branco, borda `neutral-200`) com o ícone multicolor padrão do Google e o texto "Continuar com Google", usado tanto na tela de login quanto na de cadastro.
+
+Estes tokens devem ser configurados no tema do Tailwind e nas variáveis CSS do shadcn/ui já na tarefa de setup (ver tasks.md - Seção 1), em vez de qualquer tema padrão de um dos dois.
 
 ## Risks / Trade-offs
 
@@ -111,4 +140,4 @@ O botão "Entrar com Google" usa o SDK do Google Identity Services carregado no 
 - [Sem refresh token, uma sessão expirada em uso interrompe o fluxo do usuário exigindo novo login] → Espelha a mesma limitação aceita no backend (`nutri-back` - Non-Goals); mitigado apenas por um tempo de expiração configurado no servidor que equilibre segurança e frequência de re-login (fora do controle do frontend).
 - [Dependência do SDK do Google Identity Services disponível no navegador do usuário] → Se o script do Google falhar ao carregar (bloqueador de conteúdo, rede), apenas a opção "Entrar com Google" fica indisponível; login tradicional por e-mail/senha continua funcionando normalmente, pois os dois mecanismos são independentes no frontend, espelhando a mesma independência já garantida no backend.
 - [Componentes shadcn/ui são copiados para o repositório, não uma dependência versionada] → Aceito como trade-off da abordagem shadcn/ui (mais controle, menos atualização automática); atualizações de componente são manuais quando necessário.
-- [Ausência de design visual/identidade de marca definitiva nesta change] → Sinalizado como não-objetivo explícito; uma mudança futura de UI/UX pode reestilizar as telas sem alterar o comportamento especificado aqui.
+- [Tokens de tipografia do documento (Lora) definidos aqui antecipam uma decisão que, em rigor, pertence à futura capacidade `diet-prescription`] → Aceito porque a identidade visual foi aprovada de uma só vez para todo o produto; quando `diet-prescription` for especificada, deve reaproveitar esses tokens em vez de redefinir a marca.

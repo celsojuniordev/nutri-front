@@ -3,14 +3,15 @@
 ## 1. Setup do Projeto
 
 - [ ] 1.1 Inicializar o projeto com Vite (template `react-ts`), criar `package.json`, e verificar que `npm install` e `npm run dev` sobem a aplicação padrão sem erro
-- [ ] 1.2 Adicionar e configurar Tailwind CSS (`tailwindcss`, `postcss`, `autoprefixer`) e verificar que uma classe utilitária Tailwind aplicada em `App.tsx` reflete no navegador
-- [ ] 1.3 Inicializar shadcn/ui (`components.json`, diretório `src/components/ui/`) e adicionar os componentes iniciais necessários (Button, Input, Label, Form, Card, Alert/Toast) e verificar que cada um renderiza em um teste de smoke ou no `dev server`
+- [ ] 1.2 Adicionar e configurar Tailwind CSS (`tailwindcss`, `postcss`, `autoprefixer`), configurando no tema do Tailwind os tokens de cor da identidade visual Evolvitta (paleta Sálvia/Terracota/neutros/semânticas, ver design.md - Identidade Visual e Design System), e verificar que uma classe utilitária usando um token de cor customizado (ex.: `bg-primary-500`) aplicada em `App.tsx` reflete a cor de marca correta no navegador
+- [ ] 1.3 Inicializar shadcn/ui (`components.json`, diretório `src/components/ui/`), configurando as variáveis de tema (cores, radius) para usar os tokens da identidade visual Evolvitta em vez do tema padrão, e adicionar os componentes iniciais necessários (Button, Input, Label, Form, Card, Alert/Toast) e verificar que cada um renderiza com as cores da marca em um teste de smoke ou no `dev server`
 - [ ] 1.4 Adicionar `react-router-dom` e configurar as rotas iniciais (`/login`, `/cadastro`, `/perfil`) em `App.tsx`, cada uma renderizando um placeholder, e verificar navegação manual entre elas no navegador
 - [ ] 1.5 Adicionar `@tanstack/react-query`, configurar um `QueryClientProvider` em `main.tsx`, e verificar com um teste simples que um componente consegue usar `useQuery` sem erro de contexto
 - [ ] 1.6 Adicionar `axios`, `react-hook-form`, `@hookform/resolvers`, `zod` ao projeto e verificar que `npm run build` conclui sem erros de tipo
 - [ ] 1.7 Configurar Vitest + Testing Library (`@testing-library/react`, `@testing-library/user-event`, `jsdom`) e verificar que um teste trivial de renderização de componente passa via `npm run test`
 - [ ] 1.8 Configurar Playwright (`@playwright/test`) com um teste trivial de carregamento da página inicial e verificar que `npx playwright test` executa e passa
 - [ ] 1.9 Configurar ESLint/Prettier (ou equivalente já usado no template Vite) e verificar que `npm run lint` não reporta erros no projeto inicial
+- [ ] 1.10 Configurar o carregamento das fontes Manrope, Public Sans e Lora (Google Fonts, ver design.md - Tipografia) e defini-las como fontes padrão do tema (Manrope para títulos/ações, Public Sans para corpo/UI, Lora reservada para o documento PDF), verificando visualmente que os pesos usados (Manrope 500/600/700/800, Public Sans 400/500/600/700, Lora 500/600 com itálico) carregam sem erro no navegador
 
 ## 2. Configuração de Ambiente e Client HTTP
 
@@ -35,7 +36,7 @@
 ## 5. Tela de Cadastro de Nutricionista
 
 - [ ] 5.1 Implementar `RegisterPage` com formulário (React Hook Form + `registerSchema` via `@hookform/resolvers/zod`) para nome, e-mail, senha e empresa, desabilitando o envio enquanto os campos obrigatórios não estiverem preenchidos e válidos, e verificar com um teste de componente o cenário "Envio bloqueado com campos obrigatórios vazios" do spec `nutritionist-auth`
-- [ ] 5.2 Conectar o envio do formulário à mutação `register` (via TanStack Query `useMutation`) e, em caso de sucesso, exibir confirmação e navegar para login ou área autenticada; verificar com testes de componente os cenários "Cadastro bem-sucedido sem empresa" e "Cadastro bem-sucedido com empresa" (mockando a resposta de sucesso da API)
+- [ ] 5.2 Conectar o envio do formulário à mutação `register` (via TanStack Query `useMutation`) e, em caso de sucesso, exibir confirmação e navegar para a tela de login (o cadastro não recebe token de acesso, logo não há autenticação automática); verificar com testes de componente os cenários "Cadastro bem-sucedido sem empresa" e "Cadastro bem-sucedido com empresa" (mockando a resposta de sucesso da API)
 - [ ] 5.3 Implementar o mapeamento de erro `EMAIL_ALREADY_IN_USE` (409) para uma mensagem associada ao campo e-mail, mantendo os demais campos preenchidos, e verificar com um teste de componente o cenário "E-mail duplicado rejeitado pelo servidor"
 - [ ] 5.4 Implementar o mapeamento de `VALIDATION_ERROR` (400) do servidor para mensagens por campo usando `details[].field`/`details[].message`, e verificar com um teste de componente o cenário "Erros de validação por campo retornados pelo servidor"
 - [ ] 5.5 Implementar o tratamento de erro genérico (falha de rede ou código não mapeado) preservando os dados já preenchidos no formulário, e verificar com um teste de componente o cenário "Falha de rede ou servidor indisponível no cadastro"
@@ -53,6 +54,7 @@
 - [ ] 7.2 Conectar o `idToken` obtido à mutação `loginWithGoogle` (`POST /api/auth/google`) e, em caso de sucesso, estabelecer sessão e navegar para a área autenticada, variando a mensagem exibida conforme `accountCreated`; verificar com testes de componente os cenários "Entrar com Google cria conta automaticamente" e "Entrar com Google autentica conta existente" (mockando as duas respostas possíveis)
 - [ ] 7.3 Implementar o tratamento do cancelamento/fechamento da janela de seleção de conta Google sem exibir erro, e verificar com um teste de componente o cenário "Usuário cancela a seleção de conta Google"
 - [ ] 7.4 Implementar o mapeamento de `GOOGLE_TOKEN_INVALID` (401) para uma mensagem específica de falha ao entrar com Google, distinta da mensagem de credenciais inválidas do login tradicional, e verificar com um teste de componente o cenário "Token do Google rejeitado pelo backend"
+- [ ] 7.5 Implementar o tratamento de erro genérico (falha de rede ou código não mapeado) no envio do token de identidade ao backend, sem estabelecer sessão, e verificar com um teste de componente o cenário "Falha de rede ou servidor indisponível no login via Google"
 
 ## 8. Sessão Persistente e Roteamento Protegido
 
@@ -64,6 +66,7 @@
 ## 9. Tela de Perfil e Logout
 
 - [ ] 9.1 Implementar `ProfilePage` consumindo `getMe` (via TanStack Query `useQuery`) e exibindo nome, e-mail e empresa (quando presente) do nutricionista autenticado, e verificar com testes de componente os cenários "Perfil exibido com sucesso" e "Empresa não cadastrada" do spec `nutritionist-auth`
+- [ ] 9.1.1 Implementar o tratamento de erro genérico ao carregar `getMe` (falha de rede ou resposta do servidor diferente de 401, ex.: HTTP 500), exibindo uma mensagem de erro sem limpar a sessão nem redirecionar para login, e verificar com um teste de componente o cenário "Falha ao carregar o próprio perfil" (distinguindo-o do interceptor de 401 da tarefa 2.4, que não deve disparar aqui)
 - [ ] 9.2 Implementar a ação de logout (botão) que chama `logout` (`POST /api/auth/logout`), limpa a sessão local independentemente do resultado da chamada, e redireciona para `/login`, e verificar com um teste de componente o cenário "Logout bem-sucedido"
 - [ ] 9.3 Verificar com um teste de componente/roteamento que, após logout, uma tentativa de acessar novamente uma rota protegida (incluindo simulando navegação "voltar") é negada e redireciona para login, cobrindo o cenário "Acesso após logout"
 
@@ -81,4 +84,4 @@
 
 ## 12. Documentação
 
-- [ ] 12.1 Criar/atualizar o `README.md` do projeto com instruções de setup (variáveis de ambiente `VITE_API_BASE_URL` e `VITE_GOOGLE_CLIENT_ID`, como obter um Client ID de teste no Google Cloud Console, comandos de dev/build/test) e verificar que um novo desenvolvedor consegue subir a aplicação localmente seguindo apenas essas instruções
+- [ ] 12.1 Criar/atualizar o `README.md` do projeto com instruções de setup (variáveis de ambiente `VITE_API_BASE_URL` e `VITE_GOOGLE_CLIENT_ID`, como obter um Client ID de teste no Google Cloud Console, comandos de dev/build/test), destacando explicitamente que `VITE_GOOGLE_CLIENT_ID` deve ser o mesmo Client ID configurado como `GOOGLE_CLIENT_ID` no backend (`nutri-back`) em cada ambiente — caso contrário todo login via Google falha com `GOOGLE_TOKEN_INVALID` — e verificar que um novo desenvolvedor consegue subir a aplicação localmente e autenticar via Google seguindo apenas essas instruções

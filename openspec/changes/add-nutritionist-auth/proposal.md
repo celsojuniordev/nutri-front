@@ -7,6 +7,7 @@
 ## What Changes
 
 - Adiciona a base técnica do projeto frontend: React + Vite + TypeScript, Tailwind CSS + shadcn/ui, TanStack Query + Axios, React Hook Form + Zod, Vitest + Testing Library + Playwright (decisões detalhadas e justificadas em `design.md`).
+- Adiciona a identidade visual e o design system inicial do produto: marca **Evolvitta** (nome, slogan "Acompanhe cada evolução." e símbolo), paleta de cores (Sálvia/Terracota/neutros quentes) e sistema tipográfico de duas trilhas (Manrope/Public Sans para o produto, Lora reservada para documentos entregues ao paciente), aplicados ao tema Tailwind/shadcn/ui e às telas de cadastro e login (decisões completas em `design.md`).
 - Adiciona tela de cadastro de nutricionista (nome, e-mail, senha, empresa opcional), com validação de cliente espelhando as regras do backend e tratamento dos erros `VALIDATION_ERROR` (400, por campo) e `EMAIL_ALREADY_IN_USE` (409).
 - Adiciona tela de login por e-mail/senha, com tratamento do erro genérico `INVALID_CREDENTIALS` (401) sem revelar se o e-mail existe ou se a conta é só-Google.
 - Adiciona login/cadastro via conta Google (Google Identity Services no cliente) que obtém um `idToken` e o envia a `POST /api/auth/google`, tratando os dois resultados possíveis (`accountCreated: true|false`) e o erro `GOOGLE_TOKEN_INVALID` (401).
@@ -14,7 +15,7 @@
 - Adiciona gerenciamento de sessão/autenticação no cliente (armazenamento do token, hidratação ao carregar a aplicação, logout) e roteamento protegido (rotas que exigem nutricionista autenticado redirecionam ao login quando não há sessão válida).
 - Adiciona uma tela mínima pós-login que consome `GET /api/nutricionistas/me` e exibe nome, empresa e e-mail do nutricionista autenticado, apenas para validar o fluxo ponta a ponta (não é a tela de perfil definitiva do produto).
 - Adiciona logout, que chama `POST /api/auth/logout`, limpa a sessão local e redireciona para a tela de login.
-- **Fora de escopo nesta change**: recuperação de senha, verificação de e-mail, autenticação multifator (também fora de escopo em `nutri-specs`/`nutri-back`), telas de gestão de pacientes/dieta/avaliação física (capacidades futuras), i18n/multi-idioma, design visual/identidade de marca definitiva (usa componentes padrão do shadcn/ui), refresh token (não existe no backend nesta fase).
+- **Fora de escopo nesta change**: recuperação de senha, verificação de e-mail, autenticação multifator (também fora de escopo em `nutri-specs`/`nutri-back`), telas de gestão de pacientes/dieta/avaliação física (capacidades futuras — devem reaproveitar a identidade visual definida aqui, não redefini-la), i18n/multi-idioma, refresh token (não existe no backend nesta fase).
 
 ## Capabilities
 
