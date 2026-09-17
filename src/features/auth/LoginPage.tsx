@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login } from '@/features/auth/api'
+import AuthLayout from '@/features/auth/AuthLayout'
 import GoogleLoginButton from '@/features/auth/GoogleLoginButton'
 import { loginSchema, type LoginFormValues } from '@/features/auth/schemas'
 import { useAuth } from '@/features/auth/useAuth'
@@ -55,53 +56,61 @@ function LoginPage() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-      className="mx-auto flex w-full max-w-sm flex-col gap-4 p-8"
+    <AuthLayout
+      brandPosition="left"
+      brandContent={
+        <>
+          <p className="font-heading text-xl leading-snug font-semibold text-white">
+            &ldquo;Finalmente consigo acompanhar todos os pacientes em um único lugar.&rdquo;
+          </p>
+          <p className="mt-3 text-sm text-primary-100">Camila Reis, Nutricionista — CRN 12345</p>
+        </>
+      }
     >
-      <h1 className="font-heading text-2xl font-bold text-neutral-900">Entrar</h1>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+        <h1 className="font-heading text-2xl font-bold text-neutral-900">Entrar</h1>
 
-      {formError && (
-        <Alert variant="destructive">
-          <AlertTitle>Não foi possível entrar</AlertTitle>
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      )}
+        {formError && (
+          <Alert variant="destructive">
+            <AlertTitle>Não foi possível entrar</AlertTitle>
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
+        )}
 
-      <div className="grid gap-2">
-        <Label htmlFor="login-email">E-mail</Label>
-        <Input id="login-email" type="email" aria-invalid={!!errors.email} {...register('email')} />
-        {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="login-email">E-mail</Label>
+          <Input id="login-email" type="email" aria-invalid={!!errors.email} {...register('email')} />
+          {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="login-password">Senha</Label>
-        <Input
-          id="login-password"
-          type="password"
-          aria-invalid={!!errors.password}
-          {...register('password')}
-        />
-        {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="login-password">Senha</Label>
+          <Input
+            id="login-password"
+            type="password"
+            aria-invalid={!!errors.password}
+            {...register('password')}
+          />
+          {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
+        </div>
 
-      <Button type="submit" disabled={!isValid || isSubmitting || mutation.isPending}>
-        {mutation.isPending ? 'Entrando…' : 'Entrar'}
-      </Button>
+        <Button type="submit" disabled={!isValid || isSubmitting || mutation.isPending}>
+          {mutation.isPending ? 'Entrando…' : 'Entrar'}
+        </Button>
 
-      <div className="flex items-center gap-3 text-xs text-neutral-400">
-        <div className="h-px flex-grow bg-neutral-100" />
-        ou
-        <div className="h-px flex-grow bg-neutral-100" />
-      </div>
+        <div className="flex items-center gap-3 text-xs text-neutral-400">
+          <div className="h-px flex-grow bg-neutral-100" />
+          ou
+          <div className="h-px flex-grow bg-neutral-100" />
+        </div>
 
-      <GoogleLoginButton />
+        <GoogleLoginButton />
 
-      <p className="text-center text-sm text-neutral-600">
-        Não tem conta? <Link to="/cadastro">Criar conta</Link>
-      </p>
-    </form>
+        <p className="text-center text-sm text-neutral-600">
+          Não tem conta? <Link to="/cadastro">Criar conta</Link>
+        </p>
+      </form>
+    </AuthLayout>
   )
 }
 

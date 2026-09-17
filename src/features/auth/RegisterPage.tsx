@@ -8,9 +8,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { register as registerNutritionist } from '@/features/auth/api'
+import AuthLayout from '@/features/auth/AuthLayout'
 import GoogleLoginButton from '@/features/auth/GoogleLoginButton'
 import { registerSchema, type RegisterFormValues } from '@/features/auth/schemas'
 import { getApiError } from '@/lib/apiError'
+
+const BENEFITS = [
+  'Cadastro de pacientes e histórico completo',
+  'Prescrição de dietas exportadas em PDF',
+  'Avaliações físicas comparadas ao longo do tempo',
+]
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -57,68 +64,88 @@ function RegisterPage() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-      className="mx-auto flex w-full max-w-sm flex-col gap-4 p-8"
+    <AuthLayout
+      brandPosition="right"
+      brandContent={
+        <>
+          <p className="text-xs font-bold tracking-wider text-primary-300 uppercase">
+            Tudo em um só lugar
+          </p>
+          <ul className="mt-4 flex flex-col gap-3">
+            {BENEFITS.map((benefit) => (
+              <li key={benefit} className="flex items-start gap-2 text-sm text-primary-100">
+                <span aria-hidden="true">✓</span>
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      }
     >
-      <h1 className="font-heading text-2xl font-bold text-neutral-900">Criar conta</h1>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+        <h1 className="font-heading text-2xl font-bold text-neutral-900">Criar conta</h1>
 
-      {formError && (
-        <Alert variant="destructive">
-          <AlertTitle>Não foi possível criar sua conta</AlertTitle>
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      )}
+        {formError && (
+          <Alert variant="destructive">
+            <AlertTitle>Não foi possível criar sua conta</AlertTitle>
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
+        )}
 
-      <div className="grid gap-2">
-        <Label htmlFor="register-name">Nome completo</Label>
-        <Input id="register-name" type="text" aria-invalid={!!errors.name} {...register('name')} />
-        {errors.name && <p className="text-sm text-danger">{errors.name.message}</p>}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="register-name">Nome completo</Label>
+          <Input id="register-name" type="text" aria-invalid={!!errors.name} {...register('name')} />
+          {errors.name && <p className="text-sm text-danger">{errors.name.message}</p>}
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="register-email">E-mail</Label>
-        <Input id="register-email" type="email" aria-invalid={!!errors.email} {...register('email')} />
-        {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="register-email">E-mail</Label>
+          <Input id="register-email" type="email" aria-invalid={!!errors.email} {...register('email')} />
+          {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="register-password">Senha</Label>
-        <Input
-          id="register-password"
-          type="password"
-          aria-invalid={!!errors.password}
-          {...register('password')}
-        />
-        {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
-        <p className="text-xs text-neutral-600">Mínimo de 8 caracteres, com letra e número.</p>
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="register-password">Senha</Label>
+          <Input
+            id="register-password"
+            type="password"
+            aria-invalid={!!errors.password}
+            {...register('password')}
+          />
+          {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
+          <p className="text-xs text-neutral-600">Mínimo de 8 caracteres, com letra e número.</p>
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="register-company">
-          Empresa <span className="text-neutral-400">(opcional)</span>
-        </Label>
-        <Input id="register-company" type="text" aria-invalid={!!errors.company} {...register('company')} />
-        {errors.company && <p className="text-sm text-danger">{errors.company.message}</p>}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="register-company">
+            Empresa <span className="text-neutral-400">(opcional)</span>
+          </Label>
+          <Input
+            id="register-company"
+            type="text"
+            aria-invalid={!!errors.company}
+            {...register('company')}
+          />
+          {errors.company && <p className="text-sm text-danger">{errors.company.message}</p>}
+        </div>
 
-      <Button type="submit" disabled={!isValid || isSubmitting || mutation.isPending}>
-        {mutation.isPending ? 'Criando conta…' : 'Criar conta'}
-      </Button>
+        <Button type="submit" disabled={!isValid || isSubmitting || mutation.isPending}>
+          {mutation.isPending ? 'Criando conta…' : 'Criar conta'}
+        </Button>
 
-      <div className="flex items-center gap-3 text-xs text-neutral-400">
-        <div className="h-px flex-grow bg-neutral-100" />
-        ou
-        <div className="h-px flex-grow bg-neutral-100" />
-      </div>
+        <div className="flex items-center gap-3 text-xs text-neutral-400">
+          <div className="h-px flex-grow bg-neutral-100" />
+          ou
+          <div className="h-px flex-grow bg-neutral-100" />
+        </div>
 
-      <GoogleLoginButton />
+        <GoogleLoginButton />
 
-      <p className="text-center text-sm text-neutral-600">
-        Já tem conta? <Link to="/login">Entrar</Link>
-      </p>
-    </form>
+        <p className="text-center text-sm text-neutral-600">
+          Já tem conta? <Link to="/login">Entrar</Link>
+        </p>
+      </form>
+    </AuthLayout>
   )
 }
 
